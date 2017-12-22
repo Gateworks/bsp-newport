@@ -37,6 +37,14 @@ atf: toolchain
 linux: toolchain
 	$(MAKE) -C linux newport_defconfig all
 
+.PHONY: kernel_image
+kernel_image: toolchain
+	$(MAKE) linux
+	mkdir -p linux/install/boot
+	cp linux/arch/arm64/boot/Image linux/install/boot
+	make -C linux INSTALL_MOD_PATH=install modules_install
+	tar -cvJf linux-newport.tar.xz --numeric-owner -C linux/install .
+
 .PHONY: uboot-fip
 uboot-fip: uboot
 	$(MAKE) atf
