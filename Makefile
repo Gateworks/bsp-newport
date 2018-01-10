@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 
 .PHONY: all
-all: firmware
+all: firmware kernel_image
 
 .PHONY: toolchain
 toolchain: thunderx-tools-97
