@@ -45,6 +45,7 @@ kernel_menuconfig: toolchain
 .PHONY: kernel_image
 kernel_image: toolchain
 	$(MAKE) linux
+	rm -rf linux/install
 	mkdir -p linux/install/boot
 	cp linux/arch/arm64/boot/Image linux/install/boot
 	make -C linux INSTALL_MOD_PATH=install modules_install
