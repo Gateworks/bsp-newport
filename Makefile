@@ -37,6 +37,11 @@ atf: toolchain
 linux: toolchain
 	$(MAKE) -C linux newport_defconfig all
 
+.PHONY: kernel_menuconfig
+kernel_menuconfig: toolchain
+	$(MAKE) -C linux menuconfig
+	$(MAKE) -C linux savedefconfig
+
 .PHONY: kernel_image
 kernel_image: toolchain
 	$(MAKE) linux
