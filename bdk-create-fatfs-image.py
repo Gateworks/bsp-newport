@@ -171,18 +171,18 @@ def flash_create(args):
     flash = update_image(flash, ap_bl1, True, 0x10200, 0x10300, 0x50000, args)
     # Update the SCP BL1 non-trusted, CLIB=0x10400, CSIB=0x10500, Image=0x80000
     # Must be 240KB or less. 256KB minus 16KB for stack, not encrypted
-    scp_bl1 = read_elf(args.scp_bl1, 0x3c000, False, 0x80004000)
-    flash = update_image(flash, scp_bl1, False, 0x10400, 0x10500, 0x80000, args)
+    #scp_bl1 = read_elf(args.scp_bl1, 0x3c000, False, 0x80004000)
+    #flash = update_image(flash, scp_bl1, False, 0x10400, 0x10500, 0x80000, args)
     # Update the SCP BL1 trusted, CLIB=0x10600, CSIB=0x10700, Image=0xc0000
     # Must be 240KB or less. 256KB minus 16KB for stack, encrypted
-    flash = update_image(flash, scp_bl1, True, 0x10600, 0x10700, 0xc0000, args)
+    #flash = update_image(flash, scp_bl1, True, 0x10600, 0x10700, 0xc0000, args)
     # Update the MCP BL1 non-trusted, CLIB=0x10800, CSIB=0x10900, Image=0x100000
     # Must be 240KB or less. 256KB minus 16KB for stack, not encrypted
-    mcp_bl1 = read_elf(args.mcp_bl1, 0x3c000, False, 0x80004000)
-    flash = update_image(flash, mcp_bl1, False, 0x10800, 0x10900, 0x100000, args)
+    #mcp_bl1 = read_elf(args.mcp_bl1, 0x3c000, False, 0x80004000)
+    #flash = update_image(flash, mcp_bl1, False, 0x10800, 0x10900, 0x100000, args)
     # Update the MCP BL1 trusted, CLIB=0x10a00, CSIB=0x10b00, Image=0x140000
     # Must be 240KB or less. 256KB minus 16KB for stack, encrypted
-    flash = update_image(flash, mcp_bl1, True, 0x10a00, 0x10b00, 0x140000, args)
+    #flash = update_image(flash, mcp_bl1, True, 0x10a00, 0x10b00, 0x140000, args)
     # Add the FAT filesystem to it
     flash += fatfs_create(args)
     assert len(flash) == FIXED_SIZE + FATFS_SIZE
