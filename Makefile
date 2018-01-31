@@ -15,7 +15,27 @@ firmware:
 	$(MAKE) atf
 	$(MAKE) uboot-fip
 	$(MAKE) dts
-	make-bootfs.py --bs bdk/target-bin/bdk.bin --bl1 atf/build/t81/release/bl1.bin --fip fip.img -f firmware-newport.img
+	cp bdk/utils/fatfs-tool/fatfs-tool bin/
+	$(MAKE) firmware-image
+
+.PHONY: firmware-image
+firmware-image:
+	# generate our own bdk.bin with different contents/offsets
+	./newport/bdk-create-fatfs-image.py create \
+		--out bdk.bin \
+		--ap_bl1 bdk/apps/boot/boot.bin \
+		--key bdk/trust-keys/hw-rot-private.pem \
+		--nv 0   \
+		bdk/apps/init/init.bin \
+		bdk/apps/setup/setup.bin.lzma \
+		bdk/trust-keys/bdk-sign.pub \
+		bdk/boards/gw*.dtb \
+		dts/gw*.dtb
+	./newport/make-bootfs.py \
+		--bs bdk.bin \
+		--bl1 atf/build/t81/release/bl1.bin \
+		--fip fip.img \
+		-f firmware-newport.img
 	fixpart firmware-newport.img
 
 .PHONY: bdk
