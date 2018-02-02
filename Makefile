@@ -38,6 +38,12 @@ firmware-image:
 		--bl1 atf/build/t81/release/bl1.bin \
 		--fip fip.img \
 		-f firmware-newport.img
+	# configure U-Boot env
+	truncate -s 16M firmware-newport.img
+	dd if=/dev/zero of=firmware-newport.img bs=1k seek=16320 count=64
+	./u-boot/tools/env/fw_setenv \
+		--config newport/fw_env.config \
+		--script newport/newport.env
 
 .PHONY: bdk
 bdk: toolchain
@@ -47,6 +53,7 @@ bdk: toolchain
 .PHONY: uboot
 uboot: toolchain
 	$(MAKE) -C u-boot thunderx_81xx_defconfig u-boot-nodtb.bin
+	$(MAKE) CROSS_COMPILE= -C u-boot env
 
 .PHONY: atf
 atf: toolchain
