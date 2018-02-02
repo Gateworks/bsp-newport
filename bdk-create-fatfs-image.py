@@ -211,6 +211,21 @@ def flash_fdisk(filename):
     assert p.returncode == 0, "fdisk command failed"
 
 #
+# Setup the flash partition table information using ptgen script
+# ptgen allows specification of 1 to 4 partitions with specific start/end
+# sector/sizes without any error checking or requirements
+#
+def flash_ptgen(filename, partsize):
+    start_sector = FIXED_SIZE / 512
+    end_sector = start_sector + (FATFS_SIZE / 512) - 1
+    # Create a partition table in the file
+    # Note that FatFS currently only looks at the first partition
+    p1 = "1:%d:%d " % (start_sector, end_sector)
+    p2 = "0x83:16M:%s" % partsize
+    subprocess.check_call(["./newport/ptgen", "-o", filename,
+        "-p", p1, "-p", p2])
+
+#
 # Generate a Thunder ROM_CSIB_S structure
 #
 def generate_csib(crypt_type, image, nv):
@@ -387,6 +402,9 @@ def do_arg_parse():
     group.add_option("--out", action="store", type="string", dest="out",
                       nargs=1, default="target-bin/bdk.bin",
                       help="Create a flash image of the specified name (target-bin/bdk.bin)")
+    group.add_option("--partsize", action="store", type="string", dest="partsize",
+                      nargs=1, default="7264M",
+                      help="Specify size of Linux Partition to add in MBR")
     group.add_option("--ap_bl1", action="store", type="string", dest="ap_bl1",
                       nargs=1, default="apps/boot/boot.bin",
                       help="Input ARM boot code (apps/boot/boot.bin)")
@@ -427,6 +445,7 @@ def do_arg_parse():
             self.command = args[0]
             self.files = args[1:]
             self.out = options.out
+            self.partsize = options.partsize
             self.ap_bl1 = options.ap_bl1
             self.scp_bl1 = options.scp_bl1
             self.mcp_bl1 = options.mcp_bl1
@@ -544,7 +563,7 @@ def main():
         outf.write(flash)
         outf.close()
         # Write the partition table
-        flash_fdisk(args.out)
+        flash_ptgen(args.out, args.partsize)
         asim_fuses(args)
         if args.verbose:
             show_fuses(args)
