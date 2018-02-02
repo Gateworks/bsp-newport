@@ -194,14 +194,15 @@ def flash_create(args):
 def flash_fdisk(filename):
     fdisk = fdisk_get_path()
     start_sector = FIXED_SIZE / 512
+    end_sector = start_sector + (FATFS_SIZE / 512) - 1
     # Create a partition table in the file
     # Note that FatFS currently only looks at the first partition
     # Partition 1: FAT12 covering 1.5MB to 4MB
     inp = "n\n"     #    n          New partition
     inp += "p\n"    #    p          Primary
     inp += "1\n"    #    1          Primary 1
-    inp += "%d\n" % start_sector #  Start at sector 3072, 1.5MB
-    inp += "8191\n" #    8191       End at sector 8191, 4MB
+    inp += "%d\n" % start_sector
+    inp += "%d\n" % end_sector
     inp += "t\n"    #    t          Change type
     inp += "1\n"    #    1          FAT12
     inp += "w\n"    #    w          Write changes
