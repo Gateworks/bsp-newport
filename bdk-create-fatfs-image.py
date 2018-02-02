@@ -49,8 +49,8 @@ import sys
 import ecdsa
 from elftools.elf.elffile import ELFFile
 
-FIXED_SIZE = 0x180000 # 1.5MB of Fixed data, see flash_create()
-FATFS_SIZE = 0x280000 # 2.5MB of FAT filesystem data, see fatfs_create()
+FIXED_SIZE = 0x100000 # 1M of Fixed data, see flash_create()
+FATFS_SIZE = 0xD00000 # 13312KB of FAT filesystem data, see fatfs_create()
 BDK_ROOT = os.getenv("BDK_ROOT", './') # defaults to current dir when BDK_ROOT is not set
 ROTPK = "" # Root of trust public key bytes. These fields are to be interpreted as
            # a coordinate pair (Qx,Qy) of 256-bit integers in little-endian format.

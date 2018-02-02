@@ -36,11 +36,9 @@ BDK_HEADER_MAGIC = "THUNDERX"
 BDK_HEADER_SIZE = 0x100
 
 ATF_HEADER_SIZE = 0x100
-ATF_BL1_OFFSET = 0x400000
-ATF_BL2_OFFSET = 0x580000
-ATF_LINUX_OFFSET = 0x800000
-ATF_DTC_OFFSET = 0x700000
-ATF_TBL_OFFSET = 0x480000
+ATF_BL1_OFFSET = 0xE00000 # must match bdk init/app.bin:ATF_OFFSET
+ATF_BL2_OFFSET = 0xF00000 # must match atf thunder_io_storage.c:fip_block_spec
+ATF_TBL_OFFSET = 0x480000 # unused
 
 
 def load_file(filename):
@@ -236,4 +234,5 @@ if(args.bl1):
 
 if(args.fip):
     bl2_data = load_file(args.fip)
-    update_atf_header(args.bootfs, 'ATF stage 2',  bl2_data, ATF_BL2_OFFSET,1)
+    #update_atf_header(args.bootfs, 'ATF stage 2',  bl2_data, ATF_BL2_OFFSET,1)
+    write_file(args.bootfs, bl2_data, ATF_BL2_OFFSET)
