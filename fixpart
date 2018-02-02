@@ -1,8 +1,0 @@
-#!/bin/bash
-
-file=$1
-size=$(stat --printf="%s" $file)
-truncate -s 7264M $file
-printf "3072,5120,1,,\n32768,14876671,L,,\n" | sfdisk -uS $file
-truncate -s $size $file
-sfdisk -l -uS $file

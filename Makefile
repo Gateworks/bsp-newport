@@ -18,10 +18,12 @@ firmware:
 	cp bdk/utils/fatfs-tool/fatfs-tool bin/
 	$(MAKE) firmware-image
 
+LINUXPARTSZ ?= 7264M
 .PHONY: firmware-image
 firmware-image:
 	# generate our own bdk.bin with different contents/offsets
 	./newport/bdk-create-fatfs-image.py create \
+		--partsize $(LINUXPARTSZ) \
 		--out bdk.bin \
 		--ap_bl1 bdk/apps/boot/boot.bin \
 		--key bdk/trust-keys/hw-rot-private.pem \
@@ -36,7 +38,6 @@ firmware-image:
 		--bl1 atf/build/t81/release/bl1.bin \
 		--fip fip.img \
 		-f firmware-newport.img
-	fixpart firmware-newport.img
 
 .PHONY: bdk
 bdk: toolchain
