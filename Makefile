@@ -90,6 +90,29 @@ dts:
 	make -C dts
 	fatfs-tool -i bdk/target-bin/bdk.bin cp dts/gw*.dtb /
 
+UBUNTU_KERNEL ?= linux/arch/arm64/boot/Image
+UBUNTU_FS ?= xenial-newport.ext4
+UBUNTU_IMG ?= xenial-newport.img
+.PHONY: ubuntu-image
+ubuntu-image:
+	$(MAKE) firmware-image
+	cp firmware-newport.img $(UBUNTU_IMG)
+	# create kernel.itb with compressed kernel image
+	cp $(UBUNTU_KERNEL) vmlinux
+	gzip -f vmlinux
+	./newport/mkits.sh -o kernel.its -k ${PWD}/vmlinux.gz -C gzip \
+		-v "Ubuntu"
+	mkimage -f kernel.its kernel.itb
+	# inject kernel.itb into FATFS
+	fatfs-tool -i $(UBUNTU_IMG) cp kernel.itb /
+	# inject bootscript into FATFS
+	mkimage -A arm64 -T script -C none -d newport/ubuntu.scr ./newport.scr
+	fatfs-tool -i $(UBUNTU_IMG) cp newport.scr /
+	# copy ubuntu rootfs to image
+	dd if=$(UBUNTU_FS) of=$(UBUNTU_IMG) bs=16M seek=1
+	# compress it
+	gzip -k -f $(UBUNTU_IMG)
+
 .PHONY: openwrt
 openwrt:
 	$(MAKE) -C openwrt
