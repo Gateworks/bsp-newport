@@ -26,7 +26,7 @@ elif test "${devtype}" = "usb"; then
 elif test "${devtype}" = "sata"; then
 	run get_blkdev
 fi
-setenv bootargs ${bootargs} root=${rootdev} rootwait
+setenv bootargs ${bootargs} root=${rootdev} rw rootwait
 
 # add console= option to bootargs, if any
 if test -n "${console}"; then
