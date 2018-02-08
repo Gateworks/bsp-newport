@@ -15,12 +15,10 @@ firmware:
 	$(MAKE) atf
 	$(MAKE) uboot-fip
 	$(MAKE) dts
-	cp bdk/utils/fatfs-tool/fatfs-tool bin/
-	$(MAKE) firmware-image
 
 LINUXPARTSZ ?= 7264M
 .PHONY: firmware-image
-firmware-image:
+firmware-image: firmware
 	# generate our own bdk.bin with different contents/offsets
 	./newport/bdk-create-fatfs-image.py create \
 		--partsize $(LINUXPARTSZ) \
@@ -41,25 +39,27 @@ firmware-image:
 	# configure U-Boot env
 	truncate -s 16M firmware-newport.img
 	dd if=/dev/zero of=firmware-newport.img bs=1k seek=16320 count=64
-	./u-boot/tools/env/fw_setenv \
-		--config newport/fw_env.config \
-		--script newport/newport.env
+	fw_setenv --config newport/fw_env.config --script newport/newport.env
 
 .PHONY: bdk
 bdk: toolchain
 	$(MAKE) -C bdk
-	cp bdk/bin/fatfs-tool bin/
+	[ -d bin ] || mkdir bin
+	ln -sf ../bdk/utils/fatfs-tool/fatfs-tool bin/
 
 .PHONY: uboot
 uboot: toolchain
 	$(MAKE) -C u-boot thunderx_81xx_defconfig u-boot-nodtb.bin
 	$(MAKE) CROSS_COMPILE= -C u-boot env
+	ln -sf u-boot/tools/env/fw_printenv bin/fw_printenv
+	ln -sf u-boot/tools/env/fw_printenv bin/fw_setenv
 
 .PHONY: atf
 atf: toolchain
 	$(MAKE) -C atf PLAT=t81 BL33=/dev/null SPD=none bl1
 	$(MAKE) -C atf PLAT=t81 BL33=/dev/null SPD=none fip
-	cp atf/tools/fiptool/fiptool bin/
+	[ -d bin ] || mkdir bin
+	ln -sf ../atf/tools/fiptool/fiptool bin/
 
 .PHONY: linux
 linux: toolchain
