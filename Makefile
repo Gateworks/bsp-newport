@@ -115,7 +115,11 @@ ubuntu-image:
 
 .PHONY: openwrt
 openwrt:
-	$(MAKE) -C openwrt
+	if [ -d "openwrt/feeds" ]; then \
+		$(MAKE) -C openwrt; \
+	else \
+		$(MAKE) -C openwrt/gateworks octeontx; \
+	fi
 
 OPENWRT_DIR ?= openwrt/bin/targets/octeontx/generic/
 OPENWRT_FS ?= $(OPENWRT_DIR)openwrt-octeontx-squashfs.img
