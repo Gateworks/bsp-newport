@@ -51,6 +51,7 @@ bdk: toolchain
 uboot: toolchain
 	$(MAKE) -C u-boot thunderx_81xx_defconfig u-boot-nodtb.bin
 	$(MAKE) CROSS_COMPILE= -C u-boot env
+	ln -sf ../u-boot/tools/mkimage bin/mkimage
 	ln -sf ../u-boot/tools/env/fw_printenv bin/fw_printenv
 	ln -sf ../u-boot/tools/env/fw_printenv bin/fw_setenv
 
