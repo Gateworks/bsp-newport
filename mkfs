@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# filesystem creation utility
+#
+
+usage() {
+	cat << EOF
+usage: $0 <ext4|f2fs> <outfile> <size> <files...>
+
+    outfile - the output path/file to create without the appended fstype
+    size    - size of filesystem (specify suffix of K,M,G - ie 256M)
+              (make as small as necessary for quicker flashing then resize
+               filesystem to fit the partition on boot with resize2fs)
+    files   - one or more directories or tarballs to copy/extract to the rootfs
+EOF
+	exit 0
+}
+
+error() {
+	[ -d "${tmp_mnt}" ] && {
+		umount ${tmp_mnt}
+		rm -rf ${tmp_mnt}
+	}
+	echo "$0: $2"
+	exit $1
+}
+
+[ "$1" ] || usage
+
+[ $UID -eq 0 ] || error 1 "must run as root"
+
+# parse args
+while [ "$1" ]; do
+	case "$1" in
+		-h|-?) usage;;
+	esac
+	[ "$FS" ] || { FS=$1; shift; continue; }
+	[ "$OUT" ] || { OUT=$1; shift; continue; }
+	[ "$SIZE" ] || { SIZE=$1; shift; continue; }
+	break
+done
+
+echo "FS=$FS"
+echo "OUT=$OUT"
+echo "SIZE=$SIZE"
+
+# create filesytem
+echo "Creating $SIZE $OUT..."
+truncate -s ${SIZE} $OUT
+case $FS in
+	ext4) mkfs.$FS -q -F -L rootfs $OUT;;
+	f2fs) mkfs.$FS -l rootfs $OUT;;
+	*) error 1 "unsupported filesystem type: $FS";;
+esac
+
+# mount it
+tmp_mnt=$(mktemp -d -p/tmp)
+mount $OUT ${tmp_mnt}
+
+# copy/extract files to it
+echo "Populating $OUT..."
+while [ $1 ]; do
+  echo "$1"
+  if [ -d $1 ]; then
+    cp -rup $1/* ${tmp_mnt}
+    case $? in
+       0);;
+       *) error 3 "failure copying $1: $?";;
+    esac
+  else
+    tar -C ${tmp_mnt} -xf $1
+    case $? in
+       0);;
+       2) error 2 "insufficient filesystem size";;
+       *) error 3 "failure extracing $1: $?";;
+    esac
+  fi
+  shift
+done
+umount ${tmp_mnt}
+rm -rf ${tmp_mnt}
+
+exit 0
