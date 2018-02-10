@@ -16,7 +16,7 @@ firmware:
 	$(MAKE) uboot-fip
 	$(MAKE) dts
 
-LINUXPARTSZ ?= 7264M
+LINUXPARTSZ ?= 7248M
 .PHONY: firmware-image
 firmware-image: firmware
 	# generate our own bdk.bin with different contents/offsets
