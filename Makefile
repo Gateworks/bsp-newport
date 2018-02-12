@@ -16,9 +16,18 @@ firmware:
 	$(MAKE) uboot-fip
 	$(MAKE) dts
 
+.PHONY: version
+version:
+	rm -f version
+	@echo "BDK=$(shell awk -F\" '{print $$2}' bdk/libbdk-arch/bdk-version.c)" >> version
+	@echo "ATF=$(shell strings atf/build/t81/release/bl1/build_message.o | sed -n '2p')" >> version
+	@echo "UBOOT=$(shell cat u-boot/include/config/uboot.release)" >> version
+	@echo "DTS=$(shell git -C dts describe --always --dirty)" >> version
+
+
 LINUXPARTSZ ?= 7248M
 .PHONY: firmware-image
-firmware-image: firmware
+firmware-image: firmware version
 	# generate our own bdk.bin with different contents/offsets
 	./newport/bdk-create-fatfs-image.py create \
 		--partsize $(LINUXPARTSZ) \
@@ -36,6 +45,8 @@ firmware-image: firmware
 		--bl1 atf/build/t81/release/bl1.bin \
 		--fip fip.img \
 		-f firmware-newport.img
+	# inject version info
+	fatfs-tool -i firmware-newport.img cp version /
 	# configure U-Boot env
 	truncate -s 16M firmware-newport.img
 	dd if=/dev/zero of=firmware-newport.img bs=1k seek=16320 count=64
