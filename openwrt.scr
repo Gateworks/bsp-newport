@@ -1,7 +1,18 @@
-# Standard Boot-Script for Booting OpenWrt
+# Standard Boot-Script for booting OpenWrt
 #  - use only well-known variable names provided by U-Boot Distro boot
-#  - assume uImage on U-Boot readable partition
-#  - assume rootfs is kernel partition +1
+#    - devnum - device number script run from (0 based int)
+#    - devtype - device type script run from (mmc|usb|sata)
+#    - distro_bootpart - partition script run from (0 based int)
+#    - prefix - directory boot script was found in
+#    - kernel_addr_r - address to load kernel image to
+#    - ftdcontroladdr - address dtb is at
+#
+#  - assume kernel.itb on same dev:part:dir script was found in
+#  - rootfs is on the dev script was found on and the 'next' partition
+#
+
+echo "Newport OpenWrt Boot Script"
+setenv rootfstype squashfs,f2fs
 
 # map devnum to a blkdev name
 # (TODO: use root=PARTUUID and finduuid to avoid collisions between usb/sata)
@@ -16,7 +27,7 @@ elif test "${devtype}" = "usb"; then
 elif test "${devtype}" = "sata"; then
 	run get_blkdev
 fi
-setenv bootargs ${bootargs} root=${rootdev} rootfstype=squashfs,f2fs rootwait
+setenv bootargs ${bootargs} root=${rootdev} rootfstype=${rootfstype} rootwait
 
 # add console= option to bootargs, if any
 if test -n "${console}"; then
@@ -25,6 +36,6 @@ fi
 echo "bootargs:${bootargs}"
 
 # load and boot kernel
-echo "Loading uImage from ${devtype} ${devnum}:${distro_bootpart}"
-load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} uImage
+echo "Loading kernel.itb from ${devtype} ${devnum}:${distro_bootpart} ${prefix}"
+load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} ${prefix}kernel.itb
 bootm ${kernel_addr_r} - ${fdtcontroladdr}
