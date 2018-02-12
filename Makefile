@@ -162,7 +162,7 @@ clean-bdk:
 
 .PHONY: clean-atf
 clean-atf:
-	make -C atf clean
+	make -C atf PLAT=t81 BL33=/dev/null SPD=none clean
 
 .PHONY: clean-uboot
 clean-uboot:
