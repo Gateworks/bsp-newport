@@ -32,8 +32,8 @@ usage() {
 
 # OcteonTX Defaults
 ARCH=arm64
-LOAD_ADDR=0x40080000
-ENTRY_ADDR=0x40080000
+LOAD_ADDR=0x20080000
+ENTRY_ADDR=0x20080000
 while getopts ":A:a:C:D:d:e:k:o:v:N:" OPTION
 do
 	case $OPTION in
