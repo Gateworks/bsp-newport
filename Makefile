@@ -27,7 +27,8 @@ version:
 
 LINUXPARTSZ ?= 7248M
 .PHONY: firmware-image
-firmware-image: firmware version
+firmware-image: firmware
+	$(MAKE) version
 	# generate our own bdk.bin with different contents/offsets
 	./newport/bdk-create-fatfs-image.py create \
 		--partsize $(LINUXPARTSZ) \
@@ -158,6 +159,7 @@ openwrt-image: firmware-image openwrt
 
 .PHONY: clean
 clean: clean-firmware clean-linux
+	rm -f version kernel.itb kernel.its vmlinux vmlinux.gz
 
 .PHONY: clean-linux
 clean-linux:
