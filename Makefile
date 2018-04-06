@@ -113,8 +113,7 @@ ubuntu-image:
 	# create kernel.itb with compressed kernel image
 	cp $(UBUNTU_KERNEL) vmlinux
 	gzip -f vmlinux
-	./newport/mkits.sh -o kernel.its -k ${PWD}/vmlinux.gz -C gzip \
-		-v "Ubuntu"
+	./newport/mkits.sh -o kernel.its -k vmlinux.gz -C gzip -v "Ubuntu"
 	mkimage -f kernel.its kernel.itb
 	# inject kernel.itb into FATFS
 	fatfs-tool -i $(UBUNTU_IMG) cp kernel.itb /
@@ -144,8 +143,7 @@ openwrt-image: firmware-image openwrt
 	# create kernel.itb with compressed kernel image
 	cp $(OPENWRT_KERNEL) vmlinux
 	gzip -f vmlinux
-	./newport/mkits.sh -o kernel.its -k ${PWD}/vmlinux.gz -C gzip \
-		-v "OpenWrt"
+	./newport/mkits.sh -o kernel.its -k vmlinux.gz -C gzip -v "OpenWrt"
 	mkimage -f kernel.its kernel.itb
 	# inject kernel.itb into FATFS
 	fatfs-tool -i $(OPENWRT_IMG) cp kernel.itb /
