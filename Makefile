@@ -37,9 +37,12 @@ firmware-image: firmware
 		--key bdk/trust-keys/hw-rot-private.pem \
 		--nv 0   \
 		bdk/apps/init/init.bin \
+		bdk/apps/init/init.bin.sign \
 		bdk/apps/setup/setup.bin.lzma \
+		bdk/apps/setup/setup.bin.lzma.sign \
 		bdk/trust-keys/bdk-sign.pub \
-		bdk/boards/gw*.dtb \
+		bdk/trust-keys/bdk-sign.pub.sign \
+		bdk/boards/gw*.dtb* \
 		dts/gw*.dtb
 	./newport/make-bootfs.py \
 		--bs bdk.bin \
