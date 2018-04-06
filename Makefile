@@ -49,6 +49,11 @@ firmware-image: firmware
 		--bl1 atf/build/t81/release/bl1.bin \
 		--fip fip.img \
 		-f firmware-newport.img
+ifdef ALLOW_DIAGNOSTICS
+	# inject diagnostics
+	fatfs-tool -i firmware-newport.img cp \
+		bdk/apps/diagnostics/diagnostics.bin.lzma /
+endif
 	# inject version info
 	fatfs-tool -i firmware-newport.img cp version /
 	# configure U-Boot env
