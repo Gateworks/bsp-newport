@@ -53,6 +53,8 @@ ifdef ALLOW_DIAGNOSTICS
 	# inject diagnostics
 	fatfs-tool -i firmware-newport.img cp \
 		bdk/apps/diagnostics/diagnostics.bin.lzma /
+	fatfs-tool -i firmware-newport.img cp \
+		bdk/apps/diagnostics/diagnostics.bin.lzma.sign /
 endif
 	# inject version info
 	fatfs-tool -i firmware-newport.img cp version /
