@@ -24,10 +24,14 @@ version:
 	@echo "UBOOT=$(shell cat u-boot/include/config/uboot.release)" >> version
 	@echo "DTS=$(shell git -C dts describe --always --dirty)" >> version
 
+.PHONY: jtag_image
+jtag_image:
+	wget -N http://dev.gateworks.com/jtag/mkimage_jtag
+	chmod +x mkimage_jtag
 
 LINUXPARTSZ ?= 7248M
 .PHONY: firmware-image
-firmware-image: firmware
+firmware-image: firmware jtag_image
 	$(MAKE) version
 	# generate our own bdk.bin with different contents/offsets
 	./newport/bdk-create-fatfs-image.py create \
@@ -49,6 +53,7 @@ firmware-image: firmware
 		--bl1 atf/build/t81/release/bl1.bin \
 		--fip fip.img \
 		-f firmware-newport.img
+	./mkimage_jtag --emmc -e --partconf=user firmware-newport.img@user:erase_all:0-16M > firmware-newport.bin
 ifdef ALLOW_DIAGNOSTICS
 	# inject diagnostics
 	fatfs-tool -i firmware-newport.img cp \
@@ -182,7 +187,7 @@ clean-linux:
 
 .PHONY: clean-firmware
 clean-firmware: clean-bdk clean-atf clean-uboot
-	rm -f firmware-newport.img fip.img
+	rm -f firmware-newport.img firmware-newport.bin mkimage_jtag fip.img
 
 .PHONY: clean-bdk
 clean-bdk:
