@@ -137,11 +137,22 @@ ubuntu-image: $(UBUNTU_FS) firmware-image kernel_image
 	gzip -f vmlinux
 	./newport/mkits.sh -o kernel.its -k vmlinux.gz -C gzip -v "Ubuntu"
 	mkimage -f kernel.its kernel.itb
+	# create U-Boot bootscript
+	mkimage -A arm64 -T script -C none -d newport/ubuntu.scr ./newport.scr
+ifdef BOOTSCRIPT_IN_FATFS
 	# inject kernel.itb into FATFS
 	fatfs-tool -i $(UBUNTU_IMG) cp kernel.itb /
 	# inject bootscript into FATFS
-	mkimage -A arm64 -T script -C none -d newport/ubuntu.scr ./newport.scr
 	fatfs-tool -i $(UBUNTU_IMG) cp newport.scr /
+else
+	$(eval TMP=$(shell mktemp -d -t tmp.XXXXXX))
+	echo "using $(TMP)..."
+	sudo mount $(UBUNTU_FS) $(TMP)
+	sudo cp kernel.itb $(TMP)/boot/
+	sudo cp newport.scr $(TMP)/boot/
+	sudo umount $(UBUNTU_FS)
+	sudo rmdir $(TMP)
+endif
 	# copy ubuntu rootfs to image
 	dd if=$(UBUNTU_FS) of=$(UBUNTU_IMG) bs=16M seek=1
 	# compress it

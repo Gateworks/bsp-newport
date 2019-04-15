@@ -18,7 +18,8 @@ echo "Newport Ubuntu Boot Script"
 setenv get_blkdev 'if test "${devnum}" = "2"; then setenv rootdev /dev/sdc${rootpart}; elif test "${devnum}" = "1"; then setenv rootdev /dev/sdb${rootpart}; else; setenv rootdev /dev/sda${rootpart}; fi'
 
 # generate bootargs for rootfs based on devtype
-setexpr rootpart ${distro_bootpart} + 1
+#setexpr rootpart ${distro_bootpart} + 1 # script/kernel in p<n>, root in p<n+1>
+setexpr rootpart ${distro_bootpart} # script/kernel/root same partition
 if test "${devtype}" = "mmc"; then
 	setenv rootdev /dev/mmcblk${devnum}p${rootpart}
 elif test "${devtype}" = "usb"; then
