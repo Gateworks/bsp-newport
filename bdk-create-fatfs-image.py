@@ -217,7 +217,8 @@ def flash_fdisk(filename):
 #
 def flash_ptgen(filename, partsize):
     start_sector = FIXED_SIZE / 512
-    end_sector = start_sector + (FATFS_SIZE / 512) - 1
+    #end_sector = start_sector + (FATFS_SIZE / 512) - 1
+    end_sector = 32768 - start_sector
     # Create a partition table in the file
     # Note that FatFS currently only looks at the first partition
     p1 = "1:%d:%d " % (start_sector, end_sector)
