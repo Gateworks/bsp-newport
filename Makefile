@@ -150,7 +150,7 @@ else
 	sudo mount $(UBUNTU_FS) $(TMP)
 	sudo cp kernel.itb $(TMP)/boot/
 	sudo cp newport.scr $(TMP)/boot/
-	sudo umount $(UBUNTU_FS)
+	sudo umount $(TMP)
 	sudo rmdir $(TMP)
 endif
 	# copy ubuntu rootfs to image
