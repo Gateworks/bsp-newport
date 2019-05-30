@@ -100,11 +100,18 @@ kernel_menuconfig: toolchain
 
 .PHONY: kernel_image
 kernel_image: toolchain
+	# build
 	$(MAKE) linux
+	# install
 	rm -rf linux/install
 	mkdir -p linux/install/boot
 	cp linux/arch/arm64/boot/Image linux/install/boot
 	make -C linux INSTALL_MOD_PATH=install modules_install
+	make -C linux INSTALL_HDR_PATH=install/usr headers_install
+	# cryptodev-linux build/install
+	make -C cryptodev-linux KERNEL_DIR=../linux
+	make -C cryptodev-linux KERNEL_DIR=../linux DESTDIR=../linux/install INSTALL_MOD_PATH=../linux/install install
+	# tarball
 	tar -cvJf linux-newport.tar.xz --numeric-owner -C linux/install .
 
 .PHONY: uboot-fip
