@@ -228,5 +228,5 @@ distclean: clean
 	make -C u-boot distclean
 	make -C atf distclean
 	make -C bdk distclean
-	make -C dts distclean
+	make -C dts clean
 	make -C openwrt distclean
