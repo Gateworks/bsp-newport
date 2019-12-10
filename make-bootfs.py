@@ -1,4 +1,9 @@
 #! /usr/bin/env python2
+# ***********************license start***********************************
+# Copyright (C) 2018 Marvell International Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+# https://spdx.org/licenses
+# **********************license end**************************************
 
 import os
 import sys
@@ -8,11 +13,11 @@ import time
 import argparse
 import uuid
 
-# BDK image heade for Thunder is
+# BDK image header for OcteonTX/OcteonTX2 is
 #   Offset  Size    Description
 #   0x00    4       Raw instruction for skipping header
 #   0x04    4       Length of the image, includes header
-#   0x08    8       Magic string "THUNDERX"
+#   0x08    8       Magic string "OCTEONTX"
 #   0x10    4       CRC32 of image + header. These bytes are zero when calculating the CRC
 #   0x14    4       Zero, reserved for future use
 #   0x18    64      ASCII Image name. Must always end in zero
@@ -21,24 +26,11 @@ import uuid
 #   0x100   -       Beginning of image. Header is always 256 bytes.
 # UPDATE THIS FILE WHEN EVEN BDK HEADER FORMAT CHANGES.
 
-
-
-#ATF image header for ThunderX is
-#  offset       size    Description
-#   0x00         4       lenght of the image
-#   0x04         8       Reserved
-#   0x0c         4       CRC32 image   
-#   0x10         64      Image name
-#   0x50         80    Reserved
-
-
-BDK_HEADER_MAGIC = "THUNDERX"
+BDK_HEADER_MAGIC = "OCTEONTX"
 BDK_HEADER_SIZE = 0x100
 
-ATF_HEADER_SIZE = 0x100
 ATF_BL1_OFFSET = 0xE00000 # must match bdk init/app.bin:ATF_OFFSET
-ATF_BL2_OFFSET = 0xF00000 # must match atf thunder_io_storage.c:fip_block_spec
-ATF_TBL_OFFSET = 0x480000 # unused
+ATF_FIP_OFFSET = 0xF00000 # must match atf thunder_io_storage.c:fip_block_spec
 
 
 def load_file(filename):
@@ -46,12 +38,6 @@ def load_file(filename):
     file = inf.read()
     inf.close()
     return file
-  
-def print_common_atf(data, offset):
-    atflen = struct.unpack_from('<I',data, (offset + 0x0))
-    if(atflen[0]):
-        print ' Image Len:'+str(atflen[0])
-        print ' Image Name: ' +data[(offset+0x10) : (offset +0x10 +64)]
 
 def print_common_bdk(data, offset):
     bdklen = struct.unpack_from('<I',data, (offset + 0x4))
@@ -93,7 +79,7 @@ def print_bdk_headers(bootfs_data):
     print ' BDK BOOT STUB(Non trusted)'
     print_common_bdk(bootfs_data,0x20000)
     print '***********************************************'
-        
+
     print '***********************************************'
     print ' BDK BOOT STUB(Trusted)'
     print_common_bdk(bootfs_data,0x50000)
@@ -109,17 +95,10 @@ def print_bdk_headers(bootfs_data):
     print_common_bdk(bootfs_data,0x400000)
     print '***********************************************'
 
-
-def print_atf_headers(bootfs_data):
-    print '***********************************************'
-    print ' ATF FIP'
-    print_common_atf(bootfs_data,0x480000+(1*0x100))
-    print '***********************************************'
-
 def print_fip_headers(bootfs_data):
     print '***********************************************'
     print ' FIP contents'
-    print_fip_data(bootfs_data,ATF_BL2_OFFSET)
+    print_fip_data(bootfs_data, ATF_FIP_OFFSET)
     print '***********************************************'
 
 def print_bootfs(filename):
@@ -149,30 +128,16 @@ def write_file(filename, data, offset):
     fhandle.write(data)
     fhandle.close()
 
-
-def update_atf_header(filename,imagename, data, offset,tbl_idx):
-    tbl_offset = ATF_TBL_OFFSET + (tbl_idx * 0x100)
-    #build a atf header
-    header = pack(4,len(data))
-    header += pack(8,0)
-    crc32 = 0xffffffffL & binascii.crc32(data)
-    header += pack(4, crc32)
-    name = imagename[0:63]
-    header += name
-    header += "\0" * (64 - len(name))
-    header += "\0" * (ATF_HEADER_SIZE - len(header))
-    fhandle = open(filename, 'r+b')
-    fhandle.seek(tbl_offset, 0)
-    fhandle.write(header)
-    fhandle.close()
-    write_file(filename, data, offset)
-
-
-def update_bdk_header(filename, image_name, image_version, data, offset):
-    # Save the 4 bytes at the front for the new header
-    raw_instruction = data[0:4]
-    # Remove the existing header
-    data = data[BDK_HEADER_SIZE:]
+def update_bdk_header(filename, image_name, image_version, data, offset, add_header):
+    if add_header:
+        # generate jump instruction: b 0x100
+        raw_instruction = chr(0x40) + chr(0x0) + chr(0x0) + chr(0x14)
+        data = data[0:]
+    else:
+        # Save the 4 bytes at the front for the new header
+        raw_instruction = data[0:4]
+        # Remove the existing header
+        data = data[BDK_HEADER_SIZE:]
     # Header begins with one raw instruction for 4 bytes
     header = raw_instruction
     # Total length
@@ -204,13 +169,14 @@ def update_bdk_header(filename, image_name, image_version, data, offset):
     write_file(filename, data, offset)
 
 
-parser = argparse.ArgumentParser(description='argumnets for THUNDERX BOOTFS creationg.')
-parser.add_argument( '--bs', '--bdk-image', help='bdk boot strap image') 
+parser = argparse.ArgumentParser(description='argumnets for OcteonTX BOOTFS creationg.')
+parser.add_argument( '--bs', '--bdk-image', help='bdk boot strap image')
 parser.add_argument('--bl1', '--atf-bl1', help='atf boot stage 1')
 parser.add_argument('-s', '--secure', help='set to 1 to build atf boot stage 1 for secure boot')
 parser.add_argument('--fip', '--atf-fip', help='atf boot stage 2 and 3.1/3.2/3.3')
 parser.add_argument('-f', '--bootfs', required=True, help='file to be used for bootfs')
-parser.add_argument('-p','--printfs', help='print headers included in a given ThundeX bootfs', action='store_true')
+parser.add_argument('-p','--printfs', help='print headers included in a given OcteonTX bootfs', action='store_true')
+parser.add_argument('-a','--add-header', help='add bdk header instead of updating', action='store_true')
 args = parser.parse_args()
 
 
@@ -228,11 +194,10 @@ if(args.bs):
 if(args.bl1):
     bl1_data = load_file(args.bl1)
     if(args.secure):
-        update_bdk_header(args.bl1, 'ATF stage 1', '2.0',  bl1_data, 0)
+        update_bdk_header(args.bl1, 'ATF stage 1', '2.0',  bl1_data, 0, args.add_header)
     else:
-        update_bdk_header(args.bootfs, 'ATF stage 1', '1.0',  bl1_data, ATF_BL1_OFFSET)
+        update_bdk_header(args.bootfs, 'ATF stage 1', '1.0',  bl1_data, ATF_BL1_OFFSET, args.add_header)
 
 if(args.fip):
-    bl2_data = load_file(args.fip)
-    #update_atf_header(args.bootfs, 'ATF stage 2',  bl2_data, ATF_BL2_OFFSET,1)
-    write_file(args.bootfs, bl2_data, ATF_BL2_OFFSET)
+    fip = load_file(args.fip)
+    write_file(args.bootfs, fip, ATF_FIP_OFFSET)
