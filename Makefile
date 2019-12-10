@@ -208,6 +208,7 @@ clean: clean-firmware clean-linux
 .PHONY: clean-linux
 clean-linux:
 	make -C linux clean
+	rm -rf linux/install
 
 .PHONY: clean-firmware
 clean-firmware: clean-bdk clean-atf clean-uboot
