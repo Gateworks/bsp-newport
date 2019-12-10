@@ -51,7 +51,7 @@ firmware-image: firmware jtag_image
 		dts/gw*.dtb
 	./newport/make-bootfs.py \
 		--bs bdk.bin \
-		--bl1 atf/build/t81/release/bl1.bin \
+		--bl1 atf/build/t81/release/bl1.bin -a \
 		--fip fip.img \
 		-f firmware-newport.img
 	./mkimage_jtag --emmc -e --partconf=user firmware-newport.img@user:erase_all:0-16M > firmware-newport.bin
@@ -69,24 +69,29 @@ endif
 	dd if=/dev/zero of=firmware-newport.img bs=1k seek=16320 count=64
 	fw_setenv --config newport/fw_env.config --script newport/newport.env
 
+ATF_NONSECURE_FLASH_ADDRESS ?= 0x00E00000
 .PHONY: bdk
 bdk: toolchain
-	$(MAKE) -C bdk
+	$(MAKE) -C bdk ATF_NONSECURE_FLASH_ADDRESS=$(ATF_NONSECURE_FLASH_ADDRESS)
 	[ -d bin ] || mkdir bin
 	ln -sf ../bdk/utils/fatfs-tool/fatfs-tool bin/
 
 .PHONY: uboot
 uboot: toolchain
-	$(MAKE) -C u-boot thunderx_81xx_defconfig u-boot-nodtb.bin
-	$(MAKE) CROSS_COMPILE= -C u-boot env
+	$(MAKE) -C u-boot newport_defconfig u-boot-nodtb.bin
+	$(MAKE) CROSS_COMPILE= -C u-boot envtools
 	ln -sf ../u-boot/tools/mkimage bin/mkimage
 	ln -sf ../u-boot/tools/env/fw_printenv bin/fw_printenv
 	ln -sf ../u-boot/tools/env/fw_printenv bin/fw_setenv
 
+ATF_ARGS += PLAT=t81
+ATF_ARGS += BL33=/dev/null
+ATF_ARGS += SPD=none
+ATF_ARGS += FIP_IMG_USER_LOC=1 FIP_IMG_FLASH_ADDRESS=0xF00000
 .PHONY: atf
 atf: toolchain
-	$(MAKE) -C atf PLAT=t81 BL33=/dev/null SPD=none bl1
-	$(MAKE) -C atf PLAT=t81 BL33=/dev/null SPD=none fip
+	$(MAKE) -C atf $(ATF_ARGS) bl1
+	$(MAKE) -C atf $(ATF_ARGS) fip
 	[ -d bin ] || mkdir bin
 	ln -sf ../atf/tools/fiptool/fiptool bin/
 
@@ -210,11 +215,11 @@ clean-firmware: clean-bdk clean-atf clean-uboot
 
 .PHONY: clean-bdk
 clean-bdk:
-	make -C bdk clean
+	make -C bdk distclean
 
 .PHONY: clean-atf
 clean-atf:
-	make -C atf PLAT=t81 BL33=/dev/null SPD=none clean
+	make -C atf $(ATF_ARGS) clean
 
 .PHONY: clean-uboot
 clean-uboot:
