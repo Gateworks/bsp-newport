@@ -4,10 +4,11 @@ SHELL = /bin/sh
 all: firmware kernel_image
 
 .PHONY: toolchain
-toolchain: thunderx-tools-97
-thunderx-tools-97:
-	wget http://dev.gateworks.com/sources/tools-gcc-6.2.tar.bz2
-	tar xvf tools-gcc-6.2.tar.bz2
+TOOLCHAIN ?= marvell-tools-238.0
+toolchain: $(TOOLCHAIN)
+$(TOOLCHAIN):
+	wget http://dev.gateworks.com/sources/$(TOOLCHAIN).tar.bz2
+	tar xvf $(TOOLCHAIN).tar.bz2
 
 .PHONY: firmware
 firmware:
