@@ -27,8 +27,7 @@ else
 		setenv rootdev /dev/sda${rootpart}
 	fi
 fi
-setenv bootargs ${bootargs} root=${rootdev}
-setenv bootargs rootfstype=squashfs,f2fs rootwait
+setenv bootargs ${bootargs} root=${rootdev} rootfstype=squashfs,f2fs rootwait
 
 # add console= option to bootargs, if any
 if test -n "${console}"; then
