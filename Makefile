@@ -137,9 +137,9 @@ dts:
 UBUNTU_FSSZMB ?= 1536M
 UBUNTU_REL ?=  bionic
 UBUNTU_KERNEL ?= linux/arch/arm64/boot/Image
-UBUNTU_FS ?= $(UBUNTU_REL)-arm64.ext4
+UBUNTU_FS ?= $(UBUNTU_REL)-newport.ext4
 UBUNTU_IMG ?= $(UBUNTU_REL)-newport.img
-UBUNTU_ROOTFS ?= $(UBUNTU_REL)-arm64.tar.xz
+UBUNTU_ROOTFS ?= $(UBUNTU_REL)-newport.tar.xz
 
 $(UBUNTU_FS): kernel_image
 	wget -N http://dev.gateworks.com/ubuntu/$(UBUNTU_REL)/$(UBUNTU_ROOTFS)
