@@ -27,7 +27,7 @@ else
 		setenv rootdev /dev/sda${rootpart}
 	fi
 fi
-setenv bootargs ${bootargs} root=${rootdev} rw rootwait
+setenv bootargs ${bootargs} root=${rootdev} rootwait
 
 # add console= option to bootargs, if any
 if test -n "${console}"; then
