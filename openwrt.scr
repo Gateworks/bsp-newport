@@ -29,6 +29,9 @@ else
 fi
 setenv bootargs ${bootargs} root=${rootdev} rootfstype=squashfs,f2fs rootwait
 
+# disable USB autosuspend (CN81xx errata)
+setenv bootargs ${bootargs} usbcore.autosuspend=-1
+
 # add console= option to bootargs, if any
 if test -n "${console}"; then
         setenv bootargs ${bootargs} console=${console}
