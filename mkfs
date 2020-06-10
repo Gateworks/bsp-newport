@@ -48,7 +48,15 @@ echo "SIZE=$SIZE"
 echo "Creating $SIZE $OUT..."
 truncate -s ${SIZE} $OUT
 case $FS in
-	ext4) mkfs.$FS -q -F -L rootfs $OUT;;
+	ext4)
+		# remove metadata checksums for newer e2fsprogs
+		# to allow U-Boot to write to ext4
+		if grep -q "metadata_csum" /etc/mke2fs.conf; then
+			 mkfs.$FS -q -F -O ^metadata_csum -L rootfs $OUT
+		else
+			 mkfs.$FS -q -F -L rootfs $OUT
+		fi
+		;;
 	f2fs) mkfs.$FS -l rootfs $OUT;;
 	*) error 1 "unsupported filesystem type: $FS";;
 esac
