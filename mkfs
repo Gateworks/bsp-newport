@@ -76,7 +76,7 @@ while [ $1 ]; do
        *) error 3 "failure copying $1: $?";;
     esac
   else
-    tar -C ${tmp_mnt} -xf $1
+    tar -C ${tmp_mnt} --keep-directory-symlink -xf $1
     case $? in
        0);;
        2) error 2 "insufficient filesystem size";;
