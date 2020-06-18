@@ -115,7 +115,7 @@ kernel_image: toolchain
 	rm -rf linux/install
 	mkdir -p linux/install/boot
 	cp linux/arch/arm64/boot/Image linux/install/boot
-	make -C linux INSTALL_MOD_PATH=install modules_install
+	make -C linux INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=install modules_install
 	make -C linux INSTALL_HDR_PATH=install/usr headers_install
 	# cryptodev-linux build/install
 	make -C cryptodev-linux KERNEL_DIR=../linux
