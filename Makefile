@@ -152,8 +152,8 @@ ubuntu-image: $(UBUNTU_FS) firmware-image kernel_image
 	# create kernel.itb with compressed kernel image
 	cp $(UBUNTU_KERNEL) vmlinux
 	gzip -f vmlinux
-	./newport/mkits.sh -o kernel.its -k vmlinux.gz -C gzip -v "Ubuntu"
-	mkimage -f kernel.its kernel.itb
+	mkimage -f auto -A arm64 -O linux -T kernel -C gzip -n "Ubuntu" \
+		-a 20080000 -e 20080000 -d vmlinux.gz kernel.itb
 	# create U-Boot bootscript
 	mkimage -A arm64 -T script -C none -d newport/ubuntu.scr ./newport.scr
 ifdef BOOTSCRIPT_IN_FATFS
