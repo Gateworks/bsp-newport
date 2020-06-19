@@ -135,7 +135,7 @@ dts:
 	fatfs-tool -i bdk/target-bin/bdk.bin cp dts/gw*.dtb /
 
 UBUNTU_FSSZMB ?= 1536M
-UBUNTU_REL ?=  bionic
+UBUNTU_REL ?=  focal
 UBUNTU_KERNEL ?= linux/arch/arm64/boot/Image
 UBUNTU_FS ?= $(UBUNTU_REL)-newport.ext4
 UBUNTU_IMG ?= $(UBUNTU_REL)-newport.img
@@ -143,7 +143,8 @@ UBUNTU_ROOTFS ?= $(UBUNTU_REL)-newport.tar.xz
 
 $(UBUNTU_FS): kernel_image
 	wget -N http://dev.gateworks.com/ubuntu/$(UBUNTU_REL)/$(UBUNTU_ROOTFS)
-	sudo ./newport/mkfs ext4 $(UBUNTU_FS) $(UBUNTU_FSSZMB) linux-newport.tar.xz $(UBUNTU_ROOTFS)
+	sudo ./newport/mkfs ext4 $(UBUNTU_FS) $(UBUNTU_FSSZMB) \
+		$(UBUNTU_ROOTFS) linux-newport.tar.xz
 
 .PHONY: ubuntu-image
 ubuntu-image: $(UBUNTU_FS) firmware-image kernel_image
