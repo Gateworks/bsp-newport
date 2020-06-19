@@ -177,33 +177,12 @@ endif
 
 .PHONY: openwrt
 openwrt:
-	if [ -d "openwrt/feeds" ]; then \
-		$(MAKE) -C openwrt; \
-	else \
-		$(MAKE) -C openwrt/gateworks octeontx; \
-	fi
+	make -C openwrt/gateworks octeontx
 
-OPENWRT_DIR ?= openwrt/bin/targets/octeontx/generic/
-OPENWRT_FS ?= $(OPENWRT_DIR)openwrt-octeontx-squashfs.img
-OPENWRT_KERNEL ?= $(OPENWRT_DIR)openwrt-octeontx-vmlinux
-OPENWRT_IMG ?= openwrt-newport.img
 .PHONY: openwrt-image
 openwrt-image: firmware-image openwrt
-	cp firmware-newport.img $(OPENWRT_IMG)
-	# create kernel.itb with compressed kernel image
-	cp $(OPENWRT_KERNEL) vmlinux
-	gzip -f vmlinux
-	./newport/mkits.sh -o kernel.its -k vmlinux.gz -C gzip -v "OpenWrt"
-	mkimage -f kernel.its kernel.itb
-	# inject kernel.itb into FATFS
-	fatfs-tool -i $(OPENWRT_IMG) cp kernel.itb /
-	# inject bootscript into FATFS
-	mkimage -A arm64 -T script -C none -d newport/openwrt.scr ./newport.scr
-	fatfs-tool -i $(OPENWRT_IMG) cp newport.scr /
-	# copy openwrt rootfs to image
-	dd if=$(OPENWRT_FS) of=$(OPENWRT_IMG) bs=16M seek=1
-	# compress it
-	gzip -k -f $(OPENWRT_IMG)
+	cp openwrt/bin/targets/octeontx/generic/openwrt-octeontx.img.gz \
+		openwrt-newport.img.gz
 
 .PHONY: clean
 clean: clean-firmware clean-linux
