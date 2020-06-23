@@ -181,7 +181,7 @@ openwrt:
 
 .PHONY: openwrt-image
 openwrt-image: firmware-image openwrt
-	cp openwrt/bin/targets/octeontx/generic/openwrt-octeontx.img.gz \
+	cp openwrt/bin/targets/octeontx/generic/gateworks-octeontx.img.gz \
 		openwrt-newport.img.gz
 
 .PHONY: clean
