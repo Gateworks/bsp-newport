@@ -32,6 +32,9 @@ setenv bootargs ${bootargs} root=${rootdev} rootwait
 # disable USB autosuspend (CN81xx errata)
 setenv bootargs ${bootargs} usbcore.autosuspend=-1
 
+# disable KPTI (expected chip errata)
+setenv bootargs ${bootargs} kpti=0
+
 # add console= option to bootargs, if any
 if test -n "${console}"; then
         setenv bootargs ${bootargs} console=${console}
