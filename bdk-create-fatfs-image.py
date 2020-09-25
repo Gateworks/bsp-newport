@@ -476,49 +476,49 @@ def cmd_genkey(args):
 def show_fuses(args):
     global ROTPK
     global BSSK
-    print "Root of Trust Public Key: "
+    print( "Root of Trust Public Key: " )
     Qx = ROTPK[0:32] # First number, little endian
     Qy = ROTPK[32:64] # Second number, little endian
     Qx = Qx[::-1] # Convert to big endian
     Qy = Qy[::-1] # Convert to big endian
     # Show the key in numeric (big endian) format
-    print "    Qx:            " + binascii.hexlify(Qx)
-    print "    Qy:            " + binascii.hexlify(Qy)
+    print( "    Qx:            " + binascii.hexlify(Qx) )
+    print( "    Qy:            " + binascii.hexlify(Qy) )
     # Show the key in CSIB (little endian) format
-    print "    CSIB ROTPK:    " + binascii.hexlify(ROTPK)
+    print( "    CSIB ROTPK:    " + binascii.hexlify(ROTPK) )
     # Show the key hash in FUSF_ROTPK format
     rotpk_sha = hashlib.sha256(ROTPK).digest()
     fusf_rotpkx = [rotpk_sha[0:8], rotpk_sha[8:16], rotpk_sha[16:24], rotpk_sha[24:32]]
     fusf_rotpkx = [x[::-1] for x in fusf_rotpkx]
     fusf_rotpkx = [binascii.hexlify(x) for x in fusf_rotpkx]
     for i in range(4):
-        print "    FUSF_ROTPK[%d]: 0x%s" % (i, fusf_rotpkx[i])
+        print( "    FUSF_ROTPK[%d]: 0x%s" % (i, fusf_rotpkx[i]) )
     if args.ssk or args.huk:
-        print "Secret Symmetric Keys:"
+        print( "Secret Symmetric Keys:" )
     if args.ssk:
         key0 = long(args.ssk[0:16], 16)
         key1 = long(args.ssk[16:32], 16)
         key0 = struct.pack("<Q", key0)
         key1 = struct.pack("<Q", key1)
-        print "    SSK:           " + args.ssk
-        print "    FUSF_SSK[0]:   0x" + binascii.hexlify(key0)
-        print "    FUSF_SSK[1]:   0x" + binascii.hexlify(key1)
+        print( "    SSK:           " + args.ssk )
+        print( "    FUSF_SSK[0]:   0x" + binascii.hexlify(key0) )
+        print( "    FUSF_SSK[1]:   0x" + binascii.hexlify(key1) )
     if args.huk:
         key0 = long(args.huk[0:16], 16)
         key1 = long(args.huk[16:32], 16)
         key0 = struct.pack("<Q", key0)
         key1 = struct.pack("<Q", key1)
-        print "    HUK:           " + args.huk
-        print "    FUSF_HUK[0]:   0x" + binascii.hexlify(key0)
-        print "    FUSF_HUK[1]:   0x" + binascii.hexlify(key1)
+        print( "    HUK:           " + args.huk )
+        print( "    FUSF_HUK[0]:   0x" + binascii.hexlify(key0) )
+        print( "    FUSF_HUK[1]:   0x" + binascii.hexlify(key1) )
     if BSSK:
-        print "    BSSK:          " + BSSK
-    print "Field Fuses:"
-    print "    0x3ff:0x300 (ROTPK SHA256) " + binascii.hexlify(rotpk_sha[::-1])
+        print( "    BSSK:          " + BSSK )
+    print( "Field Fuses:" )
+    print( "    0x3ff:0x300 (ROTPK SHA256) " + binascii.hexlify(rotpk_sha[::-1]) )
     if args.ssk:
-        print "    0x47f:0x400 (SSK) " + args.ssk
+        print( "    0x47f:0x400 (SSK) " + args.ssk )
     if args.huk:
-        print "    0x4ff:0x480 (HUK) " + args.huk
+        print( "    0x4ff:0x480 (HUK) " + args.huk )
 
 def asim_fuses(args):
     global ROTPK
