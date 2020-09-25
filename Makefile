@@ -67,7 +67,7 @@ endif
 	# configure U-Boot env
 	truncate -s 16M firmware-newport.img
 	dd if=/dev/zero of=firmware-newport.img bs=1k seek=16320 count=64
-	fw_setenv --config newport/fw_env.config --script newport/newport.env
+	fw_setenv --lock newport/. --config newport/fw_env.config --script newport/newport.env
 	# extract and copy default firmware to 0x80000 for backup
 	dd if=firmware-newport.img of=env bs=1k skip=16320 count=64
 	dd if=env of=firmware-newport.img bs=1k seek=512 count=64 conv=notrunc
