@@ -114,7 +114,12 @@ kernel_image: toolchain
 	# install
 	rm -rf linux/install
 	mkdir -p linux/install/boot
+	# install uncompressed kernel
 	cp linux/arch/arm64/boot/Image linux/install/boot
+	# also install a compressed kernel in a kernel.itb
+	mkimage -f auto -A arm64 -O linux -T kernel -C gzip -n "Ubuntu" \
+		-a 20080000 -e 20080000 -d linux/arch/arm64/boot/Image.gz kernel.itb
+	# install kernel modules
 	make -C linux INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=install modules_install
 	make -C linux INSTALL_HDR_PATH=install/usr headers_install
 	# cryptodev-linux build/install
