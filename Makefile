@@ -125,6 +125,9 @@ kernel_image: toolchain
 	# cryptodev-linux build/install
 	make -C cryptodev-linux KERNEL_DIR=../linux
 	make -C cryptodev-linux KERNEL_DIR=../linux DESTDIR=../linux/install INSTALL_MOD_PATH=../linux/install install
+	# wireguard-linux-compat build/install
+	make -C $(PWD)/linux M=$(PWD)/wireguard-linux-compat/src modules
+	make -C $(PWD)/linux M=$(PWD)/wireguard-linux-compat/src INSTALL_MOD_PATH=$(PWD)/linux/install modules_install
 	# tarball
 	tar -cvJf linux-newport.tar.xz --numeric-owner -C linux/install .
 
