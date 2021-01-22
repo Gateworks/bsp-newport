@@ -30,13 +30,22 @@ jtag_image:
 	wget -N http://dev.gateworks.com/jtag/mkimage_jtag
 	chmod +x mkimage_jtag
 
-LINUXPARTSZ ?= 7248M
+FATFS_START=1048576
+ifndef USE_GPT
+# if not using GPT protect the sectors containing AFT/U-Boot/Env
+# (if using GPT we will protect these with reserved partitions)
+FATFS_SIZE=15728640
+else
+FATFS_SIZE=13631488
+endif
+LINUXPARTSZMB ?= 7248
 .PHONY: firmware-image
 firmware-image: firmware jtag_image
 	$(MAKE) version
 	# generate our own bdk.bin with different contents/offsets
-	./newport/bdk-create-fatfs-image.py create \
-		--partsize $(LINUXPARTSZ) \
+	FATFS_START=$(shell printf "0x%x" $(FATFS_START)) \
+	FATFS_SIZE=$(shell printf "0x%x" $(FATFS_SIZE)) \
+		./newport/bdk-create-fatfs-image.py create \
 		--out bdk.bin \
 		--ap_bl1 bdk/apps/boot/boot.bin \
 		--key bdk/trust-keys/hw-rot-private.pem \
@@ -63,6 +72,22 @@ ifdef ALLOW_DIAGNOSTICS
 endif
 	# inject version info
 	fatfs-tool -i firmware-newport.img cp version /
+ifdef USE_GPT
+	# replace partition table with gpt
+	$(eval TMP=$(shell mktemp -t tmp.XXXXXX))
+	echo "creating new GPT in $(TMP)..."
+	./newport/gptgen.py \
+		--disk-size 16M \
+		-p fatfs:fat16:$(FATFS_START):$(FATFS_SIZE) \
+		-p atf:reserved:$$((0xe00000)):1024K \
+		-p uboot:reserved:$$((0xf00000)):960K \
+		-p env:reserved:$$((0xff0000)):64K \
+		-p rootfs:linux:16M:$(LINUXPARTSZMB)M \
+		--out $(TMP)
+	# apply it to the image
+	dd if=$(TMP) of=firmware-newport.img conv=notrunc
+	rm $(TMP)
+endif
 	# configure U-Boot env
 	truncate -s 16M firmware-newport.img
 	dd if=/dev/zero of=firmware-newport.img bs=1k seek=16320 count=64

@@ -49,8 +49,8 @@ import sys
 import ecdsa
 from elftools.elf.elffile import ELFFile
 
-FIXED_SIZE = 0x100000 # 1M of Fixed data, see flash_create()
-FATFS_SIZE = 0xD00000 # 13312KB of FAT filesystem data, see fatfs_create()
+FIXED_SIZE = int(os.getenv("FATFS_START", '0x100000'), 16) # 1M of Fixed data, see flash_create()
+FATFS_SIZE = int(os.getenv("FATFS_SIZE", '0xD00000'), 16) # 13312KB of FAT filesystem data, see fatfs_create()
 BDK_ROOT = os.getenv("BDK_ROOT", './') # defaults to current dir when BDK_ROOT is not set
 ROTPK = "" # Root of trust public key bytes. These fields are to be interpreted as
            # a coordinate pair (Qx,Qy) of 256-bit integers in little-endian format.
@@ -217,8 +217,7 @@ def flash_fdisk(filename):
 #
 def flash_ptgen(filename, partsize):
     start_sector = FIXED_SIZE / 512
-    #end_sector = start_sector + (FATFS_SIZE / 512) - 1
-    end_sector = 32768 - start_sector
+    end_sector = start_sector + (FATFS_SIZE / 512) - 1
     # Create a partition table in the file
     # Note that FatFS currently only looks at the first partition
     p1 = "1:%d:%d " % (start_sector, end_sector)
