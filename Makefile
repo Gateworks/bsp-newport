@@ -54,7 +54,6 @@ firmware-image: firmware jtag_image
 		--bl1 atf/build/t81/release/bl1.bin -a \
 		--fip fip.img \
 		-f firmware-newport.img
-	./mkimage_jtag --emmc -e --partconf=user firmware-newport.img@user:erase_all:0-16M > firmware-newport.bin
 ifdef ALLOW_DIAGNOSTICS
 	# inject diagnostics
 	fatfs-tool -i firmware-newport.img cp \
@@ -71,6 +70,8 @@ endif
 	# extract and copy default firmware to 0x80000 for backup
 	dd if=firmware-newport.img of=env bs=1k skip=16320 count=64
 	dd if=env of=firmware-newport.img bs=1k seek=512 count=64 conv=notrunc
+	# create jtag-able binary
+	./mkimage_jtag --emmc -e --partconf=user firmware-newport.img@user:erase_all:0-16M > firmware-newport.bin
 
 ATF_NONSECURE_FLASH_ADDRESS ?= 0x00E00000
 .PHONY: bdk
