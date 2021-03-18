@@ -30,6 +30,22 @@ jtag_image:
 	wget -N http://dev.gateworks.com/jtag/mkimage_jtag
 	chmod +x mkimage_jtag
 
+%.sign: % bdk/trust-keys/bdk-sign-private.pem
+	BDK_ROOT=bdk bdk/bin/bdk-aes-pad $<
+	BDK_ROOT=bdk bdk/bin/bdk-sign bdk-sign-private $@ $<
+
+%.lzma: %
+	bdk/bin/lzma e $^ $@
+	bdk/bin/bdk-aes-pad $@
+
+atf/build/t81/release/bl1.bin: atf
+bdk/target-bin/bl1.bin: atf/build/t81/release/bl1.bin
+	cp atf/build/t81/release/bl1.bin bdk/target-bin/bl1.bin
+	./newport/make-bootfs.py -s 1 --bl1 bdk/target-bin/bl1.bin -a --bootfs /dev/null
+
+bdk/target-bin/bl1.bin.lzma.sign: bdk/target-bin/bl1.bin.lzma bdk/trust-keys/bdk-sign-private.pem
+	BDK_ROOT=bdk bdk/bin/bdk-sign bdk-sign-private $@ $<
+
 FATFS_START=1048576
 ifndef USE_GPT
 # if not using GPT protect the sectors containing AFT/U-Boot/Env
@@ -39,8 +55,12 @@ else
 FATFS_SIZE=13631488
 endif
 LINUXPARTSZMB ?= 7248
+NV_ARGS?=0
+DTS_FILES=$(wildcard dts/*.dts)
+DTB_FILES=$(DTS_FILES:%.dts=%.dtb)
+DTB_SIGNATURES=$(DTS_FILES:%.dts=%.dtb.sign)
 .PHONY: firmware-image
-firmware-image: firmware jtag_image
+firmware-image: dts $(DTB_SIGNATURES) firmware jtag_image bdk/target-bin/bl1.bin.lzma.sign
 	$(MAKE) version
 	# generate our own bdk.bin with different contents/offsets
 	FATFS_START=$(shell printf "0x%x" $(FATFS_START)) \
@@ -49,7 +69,7 @@ firmware-image: firmware jtag_image
 		--out bdk.bin \
 		--ap_bl1 bdk/apps/boot/boot.bin \
 		--key bdk/trust-keys/hw-rot-private.pem \
-		--nv 0   \
+		--nv $(NV_ARGS) \
 		bdk/apps/init/init.bin \
 		bdk/apps/init/init.bin.sign \
 		bdk/apps/setup/setup.bin.lzma \
@@ -57,7 +77,10 @@ firmware-image: firmware jtag_image
 		bdk/trust-keys/bdk-sign.pub \
 		bdk/trust-keys/bdk-sign.pub.sign \
 		bdk/boards/gw*.dtb* \
-		dts/gw*.dtb
+		bdk/target-bin/bl1.bin.lzma \
+		bdk/target-bin/bl1.bin.lzma.sign \
+		$(DTB_FILES) \
+		$(DTB_SIGNATURES)
 	./newport/make-bootfs.py \
 		--bs bdk.bin \
 		--bl1 atf/build/t81/release/bl1.bin -a \
