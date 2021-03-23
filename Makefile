@@ -189,7 +189,6 @@ uboot-fip: uboot
 .PHONY: dts
 dts:
 	make -C dts
-	fatfs-tool -i bdk/target-bin/bdk.bin cp dts/gw*.dtb /
 
 UBUNTU_FSSZMB ?= 1536M
 UBUNTU_REL ?=  focal
