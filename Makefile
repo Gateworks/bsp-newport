@@ -255,7 +255,7 @@ clean-firmware: clean-bdk clean-atf clean-uboot
 
 .PHONY: clean-bdk
 clean-bdk:
-	make -C bdk distclean
+	make -C bdk clean
 
 .PHONY: clean-atf
 clean-atf:
