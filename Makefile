@@ -31,7 +31,6 @@ jtag_image:
 	chmod +x mkimage_jtag
 
 %.sign: % bdk/trust-keys/bdk-sign-private.pem
-	BDK_ROOT=bdk bdk/bin/bdk-aes-pad $<
 	BDK_ROOT=bdk bdk/bin/bdk-sign bdk-sign-private $@ $<
 
 %.lzma: %
