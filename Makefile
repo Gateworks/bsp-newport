@@ -30,6 +30,9 @@ jtag_image:
 	wget -N http://dev.gateworks.com/jtag/mkimage_jtag
 	chmod +x mkimage_jtag
 
+%.dtb: %.dts
+	$(MAKE) dts
+
 %.sign: % bdk/trust-keys/bdk-sign-private.pem
 	BDK_ROOT=bdk bdk/bin/bdk-sign bdk-sign-private $@ $<
 
@@ -59,7 +62,7 @@ DTS_FILES=$(wildcard dts/*.dts)
 DTB_FILES=$(DTS_FILES:%.dts=%.dtb)
 DTB_SIGNATURES=$(DTS_FILES:%.dts=%.dtb.sign)
 .PHONY: firmware-image
-firmware-image: dts $(DTB_SIGNATURES) firmware jtag_image bdk/target-bin/bl1.bin.lzma.sign
+firmware-image: dts $(DTB_FILES) $(DTB_SIGNATURES) firmware jtag_image bdk/target-bin/bl1.bin.lzma.sign
 	$(MAKE) version
 	# generate our own bdk.bin with different contents/offsets
 	FATFS_START=$(shell printf "0x%x" $(FATFS_START)) \
