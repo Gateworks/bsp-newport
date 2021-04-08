@@ -217,10 +217,9 @@ def flash_fdisk(filename):
 #
 def flash_ptgen(filename, partsize):
     start_sector = FIXED_SIZE / 512
-    end_sector = start_sector + (FATFS_SIZE / 512) - 1
     # Create a partition table in the file
     # Note that FatFS currently only looks at the first partition
-    p1 = "1:%d:%d " % (start_sector, end_sector)
+    p1 = "1:%d:%d " % (start_sector, FATFS_SIZE / 512)
     p2 = "0x83:16M:%s" % partsize
     subprocess.check_call(["./newport/ptgen", "-o", filename,
         "-p", p1, "-p", p2])
