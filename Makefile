@@ -49,13 +49,7 @@ bdk/target-bin/bl1.bin.lzma.sign: bdk/target-bin/bl1.bin.lzma bdk/trust-keys/bdk
 	BDK_ROOT=bdk bdk/bin/bdk-sign bdk-sign-private $@ $<
 
 FATFS_START=1048576
-ifndef USE_GPT
-# if not using GPT protect the sectors containing AFT/U-Boot/Env
-# (if using GPT we will protect these with reserved partitions)
-FATFS_SIZE=15728640
-else
 FATFS_SIZE=13631488
-endif
 LINUXPARTSZMB ?= 7248
 NV_ARGS?=0
 DTS_FILES=$(wildcard dts/*.dts)
