@@ -163,16 +163,13 @@ kernel_image: toolchain
 	cp linux/arch/arm64/boot/Image linux/install/boot
 	# also install a compressed kernel in a kernel.itb
 	mkimage -f auto -A arm64 -O linux -T kernel -C gzip -n "Ubuntu" \
-		-a 20080000 -e 20080000 -d linux/arch/arm64/boot/Image.gz kernel.itb
+		-a $(LOADADDR) -e $(LOADADDR) -d linux/arch/arm64/boot/Image.gz kernel.itb
 	# install kernel modules
 	make -C linux INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=install modules_install
 	make -C linux INSTALL_HDR_PATH=install/usr headers_install
 	# cryptodev-linux build/install
 	make -C cryptodev-linux KERNEL_DIR=../linux
 	make -C cryptodev-linux KERNEL_DIR=../linux DESTDIR=../linux/install INSTALL_MOD_PATH=../linux/install install
-	# wireguard-linux-compat build/install
-	make -C $(PWD)/linux M=$(PWD)/wireguard-linux-compat/src modules
-	make -C $(PWD)/linux M=$(PWD)/wireguard-linux-compat/src INSTALL_MOD_PATH=$(PWD)/linux/install modules_install
 	# tarball
 	tar -cvJf linux-newport.tar.xz --numeric-owner -C linux/install .
 
@@ -205,7 +202,7 @@ ubuntu-image: $(UBUNTU_FS) firmware-image kernel_image
 	cp $(UBUNTU_KERNEL) vmlinux
 	gzip -f vmlinux
 	mkimage -f auto -A arm64 -O linux -T kernel -C gzip -n "Ubuntu" \
-		-a 20080000 -e 20080000 -d vmlinux.gz kernel.itb
+		-a $(LOADADDR) -e $(LOADADDR) -d vmlinux.gz kernel.itb
 	# create U-Boot bootscript
 	mkimage -A arm64 -T script -C none -d newport/ubuntu.scr ./newport.scr
 ifdef BOOTSCRIPT_IN_FATFS

@@ -1,3 +1,4 @@
 export PATH=$PWD/bin:$PWD/marvell-tools-238.0/bin:$PATH
 export CROSS_COMPILE=aarch64-marvell-linux-gnu-
 export ARCH=arm64
+export LOADADDR=0x20000000
