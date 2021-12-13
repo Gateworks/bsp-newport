@@ -190,7 +190,8 @@ kernel_image: toolchain
 	KDIR=$(PWD)/linux INSTALL_MOD_PATH=$(PWD)/linux/install \
 		INSTALL_MOD_STRIP=1 modules modules_install
 	# tarball
-	tar -cvJf linux-newport.tar.xz --numeric-owner -C linux/install .
+	tar -cvJf linux-newport.tar.xz --numeric-owner --owner=0 --group=0 \
+		-C linux/install .
 
 .PHONY: uboot-fip
 uboot-fip: uboot
