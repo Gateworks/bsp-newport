@@ -41,6 +41,9 @@ if test -n "${console}"; then
 fi
 echo "bootargs:${bootargs}"
 
+# run fixfdt if exists
+if test -n "$fixfdt"; then echo "Adjusting FDT"; run fixfdt; fi
+
 # load and boot kernel
 echo "Loading kernel.itb from ${devtype} ${devnum}:${distro_bootpart} ${prefix}"
 load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} ${prefix}kernel.itb
