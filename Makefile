@@ -171,19 +171,17 @@ kernel_image: toolchain
 	make -C cryptodev-linux KERNEL_DIR=../linux
 	make -C cryptodev-linux KERNEL_DIR=../linux DESTDIR=../linux/install INSTALL_MOD_PATH=../linux/install install
 	# newracom nrc7292 802.11ah driver
-	make -C nrc7292/package/host/nrc_driver/source/nrc_driver/nrc/ \
-		KDIR=$(PWD)/linux modules
-	make -C $(PWD)/linux \
-		M=$(PWD)/nrc7292/package/host/nrc_driver/source/nrc_driver/nrc/ \
+	make -C nrc7292/package/host/src/nrc/ KDIR=$(PWD)/linux modules
+	make -C nrc7292/package/host/src/nrc/ KDIR=$(PWD)/linux \
 		INSTALL_MOD_PATH=$(PWD)/linux/install modules_install
 	# neramcom nrc7292 firmware
 	mkdir -p linux/install/lib/firmware
 	cp nrc7292/package/host/evk/sw_pkg/nrc_pkg/sw/firmware/nrc7292_* \
 		linux/install/lib/firmware/
 	# newracom nrc7292 cli app
-	make -C nrc7292/package/host/cli_app/source/cli_app/
+	make -C nrc7292/package/host/src/cli_app/
 	mkdir -p linux/install/usr/local/bin/
-	cp nrc7292/package/host/cli_app/source/cli_app/cli_app \
+	cp nrc7292/package/host/src/cli_app/cli_app \
 		linux/install/usr/local/bin/
 	# FTDI USB-SPI driver
 	make -C ftdi-usb-spi \
