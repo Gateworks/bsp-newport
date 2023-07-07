@@ -161,9 +161,6 @@ kernel_image: toolchain
 	mkdir -p linux/install/boot
 	# install uncompressed kernel
 	cp linux/arch/arm64/boot/Image linux/install/boot
-	# also install a compressed kernel in a kernel.itb
-	mkimage -f auto -A arm64 -O linux -T kernel -C gzip -n "Ubuntu" \
-		-a $(LOADADDR) -e $(LOADADDR) -d linux/arch/arm64/boot/Image.gz kernel.itb
 	# install kernel modules
 	make -C linux INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=install modules_install
 	make -C linux INSTALL_HDR_PATH=install/usr headers_install
@@ -216,23 +213,18 @@ $(UBUNTU_FS): kernel_image
 .PHONY: ubuntu-image
 ubuntu-image: $(UBUNTU_FS) firmware-image kernel_image
 	cp firmware-newport.img $(UBUNTU_IMG)
-	# create kernel.itb with compressed kernel image
-	cp $(UBUNTU_KERNEL) vmlinux
-	gzip -f vmlinux
-	mkimage -f auto -A arm64 -O linux -T kernel -C gzip -n "Ubuntu" \
-		-a $(LOADADDR) -e $(LOADADDR) -d vmlinux.gz kernel.itb
 	# create U-Boot bootscript
 	mkimage -A arm64 -T script -C none -d newport/ubuntu.scr ./newport.scr
 ifdef BOOTSCRIPT_IN_FATFS
-	# inject kernel.itb into FATFS
-	fatfs-tool -i $(UBUNTU_IMG) cp kernel.itb /
+	# inject kernel into FATFS
+	fatfs-tool -i $(UBUNTU_IMG) cp $(UBUNTU_KERNEL) /
 	# inject bootscript into FATFS
 	fatfs-tool -i $(UBUNTU_IMG) cp newport.scr /
 else
 	$(eval TMP=$(shell mktemp -d -t tmp.XXXXXX))
 	echo "using $(TMP)..."
 	sudo mount $(UBUNTU_FS) $(TMP)
-	sudo cp kernel.itb $(TMP)/boot/
+	sudo cp $(UBUNTU_KERNEL) $(TMP)/boot/
 	sudo cp newport.scr $(TMP)/boot/
 	sudo umount $(TMP)
 	sudo rmdir $(TMP)
@@ -244,7 +236,7 @@ endif
 
 .PHONY: clean
 clean: clean-firmware clean-linux
-	rm -f version kernel.itb kernel.its vmlinux vmlinux.gz
+	rm -f version
 
 .PHONY: clean-linux
 clean-linux:

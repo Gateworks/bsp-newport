@@ -7,7 +7,7 @@
 #    - kernel_addr_r - address to load kernel image to
 #    - ftdcontroladdr - address dtb is at
 #
-#  - assume kernel.itb on same dev:part:dir script was found in
+#  - assume kernel on same dev:part:dir script was found in
 #  - rootfs is on the dev script was found on and the 'next' partition
 #
 
@@ -45,6 +45,6 @@ echo "bootargs:${bootargs}"
 if test -n "$fixfdt"; then echo "Adjusting FDT"; run fixfdt; fi
 
 # load and boot kernel
-echo "Loading kernel.itb from ${devtype} ${devnum}:${distro_bootpart} ${prefix}"
-load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} ${prefix}kernel.itb
-bootm ${kernel_addr_r} - ${fdtcontroladdr}
+echo "Loading kernel from ${devtype} ${devnum}:${distro_bootpart} ${prefix}"
+load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} ${prefix}Image
+booti ${kernel_addr_r} - ${fdtcontroladdr}
