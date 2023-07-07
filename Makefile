@@ -242,15 +242,6 @@ endif
 	# compress it
 	gzip -k -f $(UBUNTU_IMG)
 
-.PHONY: openwrt
-openwrt:
-	make -C openwrt/gateworks octeontx
-
-.PHONY: openwrt-image
-openwrt-image: firmware-image openwrt
-	cp openwrt/bin/targets/octeontx/generic/gateworks-octeontx.img.gz \
-		openwrt-newport.img.gz
-
 .PHONY: clean
 clean: clean-firmware clean-linux
 	rm -f version kernel.itb kernel.its vmlinux vmlinux.gz
@@ -276,14 +267,9 @@ clean-atf:
 clean-uboot:
 	make -C u-boot clean
 
-.PHONY: clean-openwrt
-clean-openwrt:
-	make -C openwrt clean
-
 .PHONY: distclean
 distclean: clean
 	make -C u-boot distclean
 	make -C atf distclean
 	make -C bdk distclean
 	make -C dts clean
-	make -C openwrt distclean
