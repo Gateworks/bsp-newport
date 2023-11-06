@@ -115,7 +115,7 @@ endif
 	dd if=firmware-newport.img of=env bs=1k skip=16320 count=64
 	dd if=env of=firmware-newport.img bs=1k seek=512 count=64 conv=notrunc
 	# create jtag-able binary
-	./mkimage_jtag --emmc -s --partconf=user firmware-newport.img@user:erase_part:0-32768 > firmware-newport.bin
+	./mkimage_jtag --soc cn803x --emmc -s --partconf=user firmware-newport.img@user:erase_part:0-32768 > firmware-newport.bin
 
 ATF_NONSECURE_FLASH_ADDRESS ?= 0x00E00000
 .PHONY: bdk
